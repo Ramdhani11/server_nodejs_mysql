@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String @id @default(uuid())
+  password String @db.VarChar(100)
+  name     String @db.VarChar(100)
+  email    String @db.VarChar(100)
+  role_id  Int
+
+  @@map("users")
+}
+
+model Asset {
+  id          String   @id @default(uuid())
+  title       String   @db.VarChar(100)
+  desc        String   @db.VarChar(255)
+  category_id String
+  style_id    String
+  theme_id    String
+  price       Int
+  createdAt   DateTime @default(now())
+  image       String
+  url         String
+  category    Category @relation(fields: [category_id], references: [id])
+  style       Style    @relation(fields: [style_id], references: [id])
+  theme       Theme    @relation(fields: [theme_id], references: [id])
+
+  @@index([category_id], map: "assets_category_id_fkey")
+  @@index([style_id], map: "assets_style_id_fkey")
+  @@index([theme_id], map: "assets_theme_id_fkey")
+  @@map("assets")
+}
+
+model Category {
+  id     String  @id @default(uuid())
+  title  String  @db.VarChar(100)
+  desc   String? @db.VarChar(100)
+  assets Asset[]
+  style  Style[]
+
+  @@map("categories")
+}
+
+model Style {
+  id          String   @id @default(uuid())
+  title       String   @db.VarChar(100)
+  desc        String?  @db.VarChar(100)
+  category_id String
+  assets      Asset[]
+  category    Category @relation(fields: [category_id], references: [id])
+
+  @@index([category_id], map: "styles_category_id_fkey")
+  @@map("styles")
+}
+
+model Theme {
+  id     String  @id @default(uuid())
+  title  String  @db.VarChar(100)
+  desc   String? @db.VarChar(100)
+  assets Asset[]
+
+  @@map("themes")
+}
